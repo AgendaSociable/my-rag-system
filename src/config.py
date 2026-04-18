@@ -15,3 +15,4 @@ EMBEDDING_MODEL = "all-minilm"
 LLM_MODEL = "llama3.2:3b"
 
 TOP_K = 5
+K_CONSTANT = 60
