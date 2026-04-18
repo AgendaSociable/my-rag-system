@@ -1,3 +1,9 @@
+vector_store/
+faiss_index/
+
+data/
+
+__pycache__/
+*.pyc
 venv/
-.venv/
 .env
