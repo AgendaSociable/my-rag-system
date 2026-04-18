@@ -1,0 +1,21 @@
+# Questions de test pour le RAG system
+
+What is the Entity-Component-System (ECS) pattern and why is it used in game engines?
+
+How does a game loop work and what are the differences between fixed and variable timestep?
+
+Explain the Observer pattern and give an example of its use in game programming.
+
+Compare different memory management strategies used in game engines and their trade-offs.
+
+What are the main rendering techniques discussed across these documents?
+
+How do game engines handle collision detection, from broad-phase to narrow-phase?
+
+What is double buffering and why is it important for rendering?
+
+Explain how spatial partitioning structures (quadtrees, octrees, BSP) optimize game performance.
+
+What is the role of a scene graph in a 3D game engine?
+
+What is the best recipe for chocolate cake?

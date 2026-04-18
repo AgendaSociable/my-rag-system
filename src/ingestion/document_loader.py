@@ -33,6 +33,7 @@ class DocumentLoader:
         return docs
     
     def load_dir(self, dir_path: Path) -> List[Document]:
+        dir_path = Path(dir_path)
         if not dir_path.is_dir():
             raise NotADirectoryError(f"{dir_path} is not a directory.")
         

@@ -28,3 +28,5 @@ pydantic
 #  Tests 
 pytest
 pytest-cov
+
+# IF use OpenAI and not Ollama

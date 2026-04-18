@@ -1,0 +1,42 @@
+.
+├── ARCHITECTURE.md
+├── README.md
+├── data
+│   ├── GameEngineCourse.pdf
+│   ├── Game_Programming_Algorithms_and_Techniques.md
+│   └── Game_Programming_Patterns.txt
+├── requirements.txt
+├── scripts
+│   ├── ingestion.py
+│   ├── retrieval.py
+│   └── test_questions.txt
+├── src
+│   ├── __init__.py
+│   ├── agents
+│   ├── config.py
+│   ├── ingestion
+│   │   ├── __init__.py
+│   │   ├── chunker.py
+│   │   ├── document_loader.py
+│   │   └── loaders.py
+│   ├── main.py
+│   ├── memory
+│   ├── rag
+│   │   ├── generator.py
+│   │   └── prompt.py
+│   ├── retrieval
+│   │   ├── bm25.py
+│   │   ├── embeddings.py
+│   │   ├── hybrid.py
+│   │   ├── reranker.py
+│   │   └── vector_store.py
+│   └── utils
+│       ├── __init__.py
+│       └── logger.py
+├── structure.txt
+├── tests
+└── vector_store
+    ├── index.faiss
+    └── index.pkl
+
+12 directories, 28 files
