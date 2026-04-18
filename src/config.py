@@ -1,11 +1,11 @@
 from pathlib import Path
 
-PROJECT_DIR = Path(__file__).parent
+PROJECT_DIR = Path(__file__).parent.parent
 DATA_DIR = PROJECT_DIR / "data"
 INDEX_DIR = PROJECT_DIR / "faiss_index"
 
 CHUNK_SIZE = 800
-CUNK_OVERLAP = 200
+CHUNK_OVERLAP = 200
 SUPPORTED_TYPES = [".pdf", ".md", ".txt"]
 
 EMBEDDING_MODEL = "nomic-embed-text"
