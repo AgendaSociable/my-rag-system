@@ -26,6 +26,13 @@ L'orchestration est assurée par un superviseur **LangGraph** qui coordonne troi
 - Les modèles suivants disponibles localement :
 
 ```bash
+# Install Ollama Linux / macOS :
+curl -fsSL https://ollama.com/install.sh | sh
+
+# Install Ollama Windows :
+irm https://ollama.com/install.ps1 | iex
+
+# Install the models
 ollama pull llama3.2:3b
 ollama pull nomic-embed-text
 ```
