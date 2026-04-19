@@ -3,6 +3,8 @@ from src.retrieval.vector_store import load_vector_store
 from src.retrieval.bm25 import BM25Retriever
 from src.retrieval.hybrid import HybridRetriever
 from src.agents.supervisor import build_graph
+from src.memory.conversation import ConversationMemory
+from src.memory.query_rewriter import QueryRewriter
 
 
 def main():
@@ -12,14 +14,22 @@ def main():
     retriever = HybridRetriever(vector_store, bm25_retriever)
 
     app = build_graph(retriever)
+    memory = ConversationMemory(max_turns=5)
+    rewriter = QueryRewriter()
 
     while True:
-        question = input("\nQuestion (or 'quit'): ").strip()
+        question = input("\Question (or 'quit' / 'reset'): ").strip()
         if question.lower() in {"quit", "exit"}:
             break
+        if question.lower() == "reset":
+            memory.clear()
+            print("Memory cleared.")
+            continue
+
+        standalone_question = rewriter.rewrite(question, memory)
 
         initial_state = {
-            "question": question,
+            "question": standalone_question,
             "reformulated_query": "",
             "retrieved_docs": [],
             "answer": "",
@@ -27,18 +37,15 @@ def main():
             "verification_feedback": "",
             "retry_count": 0,
         }
-
         final_state = app.invoke(initial_state)
-        
-        print(f"VERIFIED: {final_state['is_verified']}")
-        print(f"FEEDBACK: {final_state['verification_feedback']}")
-        print(f"ATTEMPTS: {final_state['retry_count']}")
 
+        memory.add_turn(question, final_state["answer"])
 
         print("\n" + "=" * 60)
         print(f"ANSWER:\n{final_state['answer']}")
         print(f"\nVERIFIED: {final_state['is_verified']}")
         print(f"ATTEMPTS: {final_state['retry_count']}")
+        print(f"HISTORY SIZE: {len(memory.get_history())} turns")
 
 
 if __name__ == "__main__":

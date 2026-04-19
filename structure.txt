@@ -27,6 +27,9 @@
 │   │   └── loaders.py
 │   ├── main.py
 │   ├── memory
+│   │   ├── __init__.py
+│   │   ├── conversation.py
+│   │   └── query_rewriter.py
 │   ├── rag
 │   │   ├── generator.py
 │   │   └── prompt.py
@@ -45,4 +48,4 @@
     ├── index.faiss
     └── index.pkl
 
-12 directories, 34 files
+12 directories, 37 files
