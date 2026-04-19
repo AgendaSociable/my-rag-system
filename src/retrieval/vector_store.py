@@ -1,3 +1,5 @@
+"""FAISS vector store: build from documents or load from disk."""
+
 from pathlib import Path
 from typing import List
 from tqdm import tqdm
@@ -16,6 +18,23 @@ def build_vector_store(
     persist_dir: Path = VECTOR_STORE_DIR,
     batch_size: int = 32,
 ) -> FAISS:
+    """Embed documents in batches and persist a FAISS index to disk.
+
+    Chunks exceeding ``MAX_CHARS`` characters are skipped before embedding
+    to avoid Ollama context-length errors.
+
+    Args:
+        embeddings: LangChain-compatible embedding model.
+        documents: Chunks to index.
+        persist_dir: Directory where the FAISS index will be saved.
+        batch_size: Number of chunks sent to the embedding model per call.
+
+    Returns:
+        In-memory FAISS vector store (also saved to *persist_dir*).
+
+    Raises:
+        ValueError: If *documents* is empty after filtering.
+    """
     if not documents:
         raise ValueError("No documents provided to build the vector store.")
 
@@ -56,6 +75,18 @@ def load_vector_store(
     embeddings: Embeddings,
     persist_dir: Path = VECTOR_STORE_DIR,
 ) -> FAISS:
+    """Load a previously saved FAISS index from disk.
+
+    Args:
+        embeddings: Must be the same model used during ``build_vector_store``.
+        persist_dir: Directory containing the saved index.
+
+    Returns:
+        FAISS vector store ready for similarity search.
+
+    Raises:
+        FileNotFoundError: If *persist_dir* does not exist.
+    """
     if not persist_dir.exists():
         raise FileNotFoundError(f"No vector store found at {persist_dir}.")
 

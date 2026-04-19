@@ -1,4 +1,5 @@
-from mimetypes import suffix_map
+"""High-level loader that dispatches to format-specific loaders and chunks."""
+
 from pathlib import Path
 from typing import List
 
@@ -12,10 +13,27 @@ from src.utils.logger import setup_logger
 logger = setup_logger(__name__)
 
 class DocumentLoader:
+    """Detect file format, load documents, and chunk them.
+
+    Args:
+        supported_types: Collection of accepted file extensions
+    """
     def __init__(self, supported_types: set = SUPPORTED_TYPES):
         self.supported_types = supported_types
         
     def load_file(self, path: Path) -> List[Document]:
+        """Load a single file without chunking.
+
+        Args:
+            path: Path to the document.
+
+        Returns:
+            List of raw Documents with ``source`` added to metadata.
+
+        Raises:
+            FileNotFoundError: If *path* does not exist.
+            UnsupportedFormatError: If the file extension is not supported.
+        """
         if not path.exists():
             raise FileNotFoundError(f"File {path} not found.")
         
@@ -33,6 +51,20 @@ class DocumentLoader:
         return docs
     
     def load_dir(self, dir_path: Path) -> List[Document]:
+        """Load all supported files in a directory and return chunks.
+
+        Files with unsupported extensions are silently skipped.
+        Errors on individual files are logged but do not stop the process.
+
+        Args:
+            dir_path: Path to the directory to scan.
+
+        Returns:
+            Flat list of chunks ready for embedding.
+
+        Raises:
+            NotADirectoryError: If *dir_path* is not a directory.
+        """
         dir_path = Path(dir_path)
         if not dir_path.is_dir():
             raise NotADirectoryError(f"{dir_path} is not a directory.")

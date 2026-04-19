@@ -1,3 +1,4 @@
+"""End-to-end RAG pipeline: hybrid retrieval → LLM rerank → answer generation."""
 from typing import List, Tuple
 import ollama
 from src.exceptions import LLMError, EmptyContextError
@@ -10,7 +11,16 @@ from src.utils.logger import setup_logger
 logger = setup_logger(__name__)
 
 class RAGPipeline:
-    """End-to-end RAG pipeline: retrieve → rerank → generate."""
+    """End-to-end RAG pipeline: retrieve → rerank → generate.
+
+    Args:
+        retriever: Hybrid retriever combining FAISS and BM25.
+        reranker: Optional reranker. A default one is built from *model*
+                  if omitted.
+        model: Ollama model name used for generation (and for the default
+               reranker).
+    """
+
     def __init__(self, retriever: HybridRetriever, reranker: Reranker = None, model: str = LLM_MODEL):
         self.retriever = retriever
         self.reranker = reranker or Reranker(model=model)
@@ -18,19 +28,22 @@ class RAGPipeline:
         logger.info(f"RAGPipeline initialized with model: {self.model}")
     
     def answer(self, question: str, retrieve_k: int = 10, final_k: int = 3) -> dict:
-        """Answer a question using hybrid retrieval + reranking + LLM generation.
+        """Answer a question with hybrid retrieval, reranking and generation.
 
         Args:
             question: User question.
-            retrieve_k: Number of chunks fetched by hybrid retriever.
-            final_k: Number of chunks kept after reranking.
+            retrieve_k: Number of chunks fetched by the hybrid retriever.
+            final_k: Number of chunks kept after reranking and fed to the LLM.
 
         Returns:
-            Dict with keys: question, answer, sources.
+            Dict with keys:
+                - ``question``: the original question.
+                - ``answer``: the LLM answer.
+                - ``sources``: the ``(document, score)`` tuples actually cited.
 
         Raises:
-            EmptyContextError: No chunks retrieved.
-            LLMError: Ollama call failed.
+            EmptyContextError: No chunks were retrieved for the question.
+            LLMError: The Ollama call failed.
         """
         logger.info(f"Retrieving top {retrieve_k} chunks...")
         _, _, hybrid_results = self.retriever.search(question, k_retriever=retrieve_k, top_k=retrieve_k)

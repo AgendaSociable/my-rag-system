@@ -1,3 +1,5 @@
+"""Retriever agent: reformulates the query and runs hybrid search."""
+
 from langchain_ollama import ChatOllama
 from src.agents.state import AgentState
 from src.retrieval.hybrid import HybridRetriever
@@ -17,6 +19,15 @@ Original question : {question}
 Reformulated question :"""
 
 def retriever_agent(state: AgentState, retriever: HybridRetriever) -> dict:
+    """Reformulate the user question and retrieve relevant documents.
+
+    Args:
+        state: Current agent state (must contain ``question``).
+        retriever: Hybrid retriever used for the search.
+
+    Returns:
+        Partial state update with keys ``reformulated`` and ``retrieved_docs``.
+    """
     question = state["question"]
     logger.info(f"[Retriever] question: {question}")
     

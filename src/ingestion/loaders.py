@@ -1,3 +1,5 @@
+"""Low-level document loaders for PDF, Markdown and plain-text files."""
+
 from pathlib import Path
 from typing import List
 from langchain_community.document_loaders import (
@@ -13,7 +15,16 @@ logger = setup_logger(__name__)
 
 
 def load_pdf(path: Path) -> List[Document]:
-    """Load a PDF file into a list of Documents."""
+    """Load a PDF file into a list of Documents.
+     Args:
+        path: Absolute or relative path to the PDF file.
+
+    Returns:
+        List of Documents, one per page.
+
+    Raises:
+        DocumentLoadError: If the file cannot be parsed by PyPDF.
+    """
     logger.info(f"Loading PDF document from {path.name}")
     try:
         loader = PyPDFLoader(str(path)).load()
@@ -24,7 +35,16 @@ def load_pdf(path: Path) -> List[Document]:
     return loader     
 
 def load_markdown(path: Path) -> List[Document]:
-    """Load a Markdown file into a list of Documents."""
+    """Load a Markdown file into a list of Documents.
+    Args:
+        path: Absolute or relative path to the Markdown file.
+
+    Returns:
+        List of Documents (usually one).
+
+    Raises:
+        DocumentLoadError: If the file cannot be parsed.
+    """
     logger.info(f"Loading Markdown document from {path.name}")
     try:
         loader = UnstructuredMarkdownLoader(str(path)).load()
@@ -34,7 +54,16 @@ def load_markdown(path: Path) -> List[Document]:
     return loader
 
 def load_text(path: Path) -> List[Document]:
-    """Load a Text file into a list of Documents."""
+    """Load a Text file into a list of Documents.
+     Args:
+        path: Absolute or relative path to the text file.
+
+    Returns:
+        List of Documents (usually one).
+
+    Raises:
+        DocumentLoadError: If the file cannot be read (encoding error, etc.).
+    """
     logger.info(f"Loading Text document from {path.name}")
     try:
         loader = TextLoader(str(path), encoding="utf-8").load()

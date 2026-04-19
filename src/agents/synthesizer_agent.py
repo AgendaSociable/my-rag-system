@@ -1,3 +1,5 @@
+"""Synthesizer agent: generates a cited answer from retrieved documents."""
+
 from langchain_ollama import ChatOllama
 from src.agents.state import AgentState
 from src.rag.prompt import build_contexte
@@ -23,6 +25,18 @@ QUESTION : {question}
 RESPONSE :"""
 
 def synthesizer_agent(state: AgentState) -> dict:
+    """Generate an answer citing the retrieved documents.
+
+    If the verifier previously rejected an answer, its feedback is
+    appended to the prompt to steer the next attempt.
+
+    Args:
+        state: Current agent state (must contain ``question`` and
+               ``retrieved_docs``).
+
+    Returns:
+        Partial state update with key ``answer``.
+    """
     docs = state["retrieved_docs"]
     question = state["question"]
     feedback = state.get("verification_feedback", "")

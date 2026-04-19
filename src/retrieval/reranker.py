@@ -1,3 +1,5 @@
+"""LLM-based reranker that reorders retrieved chunks by relevance."""
+
 import json
 import logging
 from typing import List, Tuple
@@ -8,11 +10,27 @@ logger = logging.getLogger(__name__)
 
 
 class Reranker:
+    """Rerank retrieved chunks using an LLM as a relevance judge.
+
+    Args:
+        model: Ollama model name used for reranking.
+    """
     def __init__(self, model: str = LLM_MODEL):
         self.model = model
         logger.info(f"Reranker initialized with model: {self.model}")
 
     def rerank(self, query: str, chunks: List[Tuple], top_k: int = 3) -> List[Tuple]:
+        """Reorder chunks by LLM-judged relevance to the query.
+
+        Args:
+            query: User query.
+            chunks: Candidate ``(document, score)`` tuples from retrieval.
+            top_k: Number of chunks to return after reranking.
+
+        Returns:
+            Top-*k* chunks sorted by LLM relevance (most relevant first).
+            Falls back to original order if the LLM response is malformed.
+        """
         if not chunks:
             return []
 
@@ -22,12 +40,12 @@ class Reranker:
 
         prompt = f"""Rank the following chunks by relevance to the query.
 
-Query: {query}
+        Query: {query}
 
-Chunks:{chunks_text}
+        Chunks:{chunks_text}
 
-Return ONLY a JSON object of the form: {{"ranking": [2, 0, 4, 1, 3]}}
-where the list contains the chunk indices ordered from MOST to LEAST relevant."""
+        Return ONLY a JSON object of the form: {{"ranking": [2, 0, 4, 1, 3]}}
+        where the list contains the chunk indices ordered from MOST to LEAST relevant."""
 
         logger.info(f"Reranking {len(chunks)} chunks with LLM: {self.model}")
 
@@ -45,6 +63,16 @@ where the list contains the chunk indices ordered from MOST to LEAST relevant.""
         return [chunks[i] for i in ranked_indices[:top_k]]
 
     def _parse_response(self, raw: str, num_chunks: int) -> List[int]:
+        """Parse the LLM JSON ranking, deduplicate and fill missing indices.
+
+        Args:
+            raw: Raw JSON string returned by the LLM.
+            num_chunks: Total number of chunks the LLM was asked to rank.
+
+        Returns:
+            A valid permutation of ``range(num_chunks)``. Returns the
+            original order on parsing failure.
+        """
         try:
             data = json.loads(raw)
             indices = data.get("ranking", [])

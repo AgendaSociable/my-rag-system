@@ -1,3 +1,5 @@
+"""Interactive CLI for the multi-agent RAG system."""
+
 from src.retrieval.embeddings import get_embeddings
 from src.retrieval.vector_store import load_vector_store
 from src.retrieval.bm25 import BM25Retriever
@@ -12,7 +14,13 @@ logger = setup_logger(__name__)
 
 
 def main() -> None:
-    """Interactive CLI entrypoint for the RAG system."""
+    """Interactive CLI entrypoint for the RAG system.
+
+    Loads the persisted FAISS index, builds the hybrid retriever and the
+    LangGraph pipeline, then reads questions from stdin until the user
+    types ``quit`` or ``exit``. The command ``reset`` clears the
+    conversation memory.
+    """
     try:
         embeddings = get_embeddings()
         vector_store = load_vector_store(embeddings)

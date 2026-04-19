@@ -1,3 +1,5 @@
+"""Verifier agent: checks whether the answer is properly sourced."""
+
 import re
 from langchain_ollama import ChatOllama
 from src.agents.state import AgentState
@@ -22,6 +24,20 @@ VERDICT: YES or NO
 REASON: <a short sentence>"""
 
 def verifier_agent(state: AgentState) -> dict:
+    """Validate that the answer is supported by the retrieved sources.
+
+    Two checks are combined:
+        1. The answer contains at least one citation marker.
+        2. The LLM verdict says ``YES``.
+
+    Args:
+        state: Current agent state (must contain ``answer`` and
+               ``retrieved_docs``).
+
+    Returns:
+        Partial state update with ``is_verified``,
+        ``verification_feedback`` and incremented ``retry_count``.
+    """
     answer = state["answer"]
     docs = state["retrieved_docs"]
     

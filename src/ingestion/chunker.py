@@ -1,3 +1,5 @@
+"""Splits loaded Documents into smaller overlapping chunks."""
+
 from typing import List
 
 from langchain_core.documents import Document
@@ -13,6 +15,16 @@ def chunk_documents(
     chunk_size: int = CHUNK_SIZE,
     chunk_overlap: int = CHUNK_OVERLAP
 ) -> List[Document]:
+    """Split documents into overlapping chunks and assign a chunk_id.
+
+    Args:
+        documents: Raw documents produced by a loader.
+        chunk_size: Maximum number of characters per chunk.
+        chunk_overlap: Number of characters shared between consecutive chunks.
+
+    Returns:
+        List of chunks, each with a ``chunk_id`` added to its metadata.
+    """
     splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
     chunks = splitter.split_documents(documents)
     
