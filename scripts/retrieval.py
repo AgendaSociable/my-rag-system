@@ -49,16 +49,16 @@ def main():
     
 
     # Affichage comparatif
-    print_results(f"🔵 VECTORIEL (top {args.k})", vec_results)
-    print_results(f"🟡 BM25 (top {args.k})", bm25_results)
-    print_results(f"🟢 HYBRIDE RRF (top {args.k})", hybrid_results)
-    print_results("🔴 RERANKED LLM (top 3)", reranked_results)
+    print_results(f"VECTORIEL (top {args.k})", vec_results)
+    print_results(f"BM25 (top {args.k})", bm25_results)
+    print_results(f"HYBRIDE RRF (top {args.k})", hybrid_results)
+    print_results("RERANKED LLM (top 3)", reranked_results)
 
-    # Résumé : quels chunks sont nouveaux dans l'hybride ?
+    # Résumé
     vec_ids = {doc.page_content[:100] for doc, _ in vec_results}
     bm25_ids = {doc.page_content[:100] for doc, _ in bm25_results}
     print(f"\n{'=' * 70}")
-    print("📊 ANALYSE RRF")
+    print("RRF")
     print(f"{'=' * 70}")
     for rank, (doc, score) in enumerate(hybrid_results, 1):
         doc_id = doc.page_content[:100]

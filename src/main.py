@@ -1,57 +1,44 @@
-import argparse
 from src.retrieval.embeddings import get_embeddings
 from src.retrieval.vector_store import load_vector_store
 from src.retrieval.bm25 import BM25Retriever
 from src.retrieval.hybrid import HybridRetriever
-from src.retrieval.reranker import Reranker
-from src.rag.generator import RAGPipeline
-from src.config import LLM_MODEL
-from src.utils.logger import setup_logger
-
-logger = setup_logger(__name__)
+from src.agents.supervisor import build_graph
 
 
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("question", type=str, help="Your question")
-    parser.add_argument("--retrieve-k", type=int, default=10,
-                        help="Chunks before reranking (default: 10)")
-    parser.add_argument("--final-k", type=int, default=3,
-                        help="Chunks after reranking (default: 3)")
-    parser.add_argument("--show-sources", action="store_true",
-                        help="Display the source chunks used")
-    args = parser.parse_args()
-
-    logger.info("Loading embeddings and vector store...")
     embeddings = get_embeddings()
     vector_store = load_vector_store(embeddings)
-    bm25 = BM25Retriever.from_faiss(vector_store)
-    retriever = HybridRetriever(vector_store, bm25)
+    bm25_retriever = BM25Retriever.from_faiss(vector_store)
+    retriever = HybridRetriever(vector_store, bm25_retriever)
 
-    reranker = Reranker(model=LLM_MODEL)
-    rag = RAGPipeline(retriever, reranker)
+    app = build_graph(retriever)
 
-    result = rag.answer(
-        args.question,
-        retrieve_k=args.retrieve_k,
-        final_k=args.final_k,
-    )
+    while True:
+        question = input("\nQuestion (or 'quit'): ").strip()
+        if question.lower() in {"quit", "exit"}:
+            break
 
-    print("\n" + "=" * 70)
-    print(f"QUESTION: {result['question']}")
-    print("=" * 70)
-    print(f"\nANSWER:\n{result['answer']}\n")
+        initial_state = {
+            "question": question,
+            "reformulated_query": "",
+            "retrieved_docs": [],
+            "answer": "",
+            "is_verified": False,
+            "verification_feedback": "",
+            "retry_count": 0,
+        }
 
-    if args.show_sources:
-        print("=" * 70)
-        print("SOURCES USED:")
-        print("=" * 70)
-        for i, (doc, score) in enumerate(result["sources"], 1):
-            src = doc.metadata.get("source", "?").split("/")[-1]
-            page = doc.metadata.get("page", "?")
-            preview = doc.page_content[:200].replace("\n", " ")
-            print(f"\n[{i}] {src} (p.{page}) — score={score:.4f}")
-            print(f"    {preview}...")
+        final_state = app.invoke(initial_state)
+        
+        print(f"VERIFIED: {final_state['is_verified']}")
+        print(f"FEEDBACK: {final_state['verification_feedback']}")
+        print(f"ATTEMPTS: {final_state['retry_count']}")
+
+
+        print("\n" + "=" * 60)
+        print(f"ANSWER:\n{final_state['answer']}")
+        print(f"\nVERIFIED: {final_state['is_verified']}")
+        print(f"ATTEMPTS: {final_state['retry_count']}")
 
 
 if __name__ == "__main__":
