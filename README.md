@@ -62,6 +62,8 @@ OLLAMA_BASE_URL=http://localhost:11434
 
 > Assurez-vous qu'Ollama tourne en arrière-plan avant de lancer le système (`ollama serve`).
 
+>/!\ Je vous montre ici le contenu de .env car il n'y a rien de confidentiel dans mon cas. Évidemment dans un contexte réel le contenu du .env ne doit apparaître nulle part. 
+
 ---
 
 ## Quickstart
@@ -76,13 +78,20 @@ python -m scripts.ingest
 
 > Cette étape génère le dossier `vector_store/` contenant l'index FAISS (`index.faiss`) et les métadonnées associées (`index.pkl`).
 
-### 2. Interroger le système
+### 2.1 Interroger le système
 
 ```bash
 python -m src.main
 ```
 
 Le superviseur orchestre automatiquement le pipeline complet : réécriture de la requête → récupération hybride → synthèse → vérification → réponse finale.
+
+### 2.2 Utiliser le script de démo
+
+```bash
+python -m tests.demo
+```
+Le script de démo va permettre de lancer des questions pré-faite par rapport au contexte de base - la programmation de jeux vidéo - et de visualiser le fonctionnement grâce au demo_results.md qui sera créer à la fin de l'execution du script
 
 ---
 
@@ -156,8 +165,6 @@ Les exemples ci-dessous supposent que les documents présents dans `data/` porte
   conversationnel avant de lancer la récupération.
 ```
 
-Un fichier de questions de test est disponible dans `scripts/test_questions.txt` pour valider le comportement du pipeline.
-
 ---
 
 ## Structure du projet
@@ -173,9 +180,7 @@ my-rag-system/
 │   └── Game_Programming_Patterns.txt
 ├── requirements.txt
 ├── scripts
-│   ├── ingest.py
-│   ├── retrieval.py
-│   └── test_questions.txt
+│   └── ingest.py
 ├── src
 │   ├── __init__.py
 │   ├── agents
@@ -210,15 +215,12 @@ my-rag-system/
 │       ├── __init__.py
 │       └── logger.py
 ├── structure.txt
-├── tests
-└── vector_store
-    ├── index.faiss
-    └── index.pkl
+└──── tests
+    ├── demo.py
+    └── retrieval.py
 ```
 
 ---
-
-## Conclusion
 
 ## Conclusion
 
@@ -233,11 +235,10 @@ Ce projet implémente un pipeline RAG multi-agents local, sans dépendance à un
 
 ### Retour personnel
 
-Je tiens à remercier sincèrement l'équipe Stackeasy pour cette opportunité. Ce test technique a été une vraie expérience d'apprentissage : je suis parti de zéro sur le sujet RAG qui m'était alors complètement inconnu techniquement parlant et j'ai construit ce système pas à pas. Tout n'est pas parfait, mais j'ai fait de mon mieux avec les ressources et le temps disponibles.
+Je tiens à remercier sincèrement l'équipe Stackeasy pour cette opportunité. Ce test technique a été une vraie expérience d'apprentissage : je suis parti de zéro sur le sujet RAG qui m'était alors complètement inconnu techniquement parlant et j'ai construit ce système pas à pas. Tout n'est pas parfait évidemment, mais j'ai fait de mon mieux avec les ressources et le temps disponibles.
 
 **Sur le choix d'Ollama** — ce n'est pas la solution la plus performante comparée aux APIs OpenAI ou Anthropic, mais elle est gratuite, locale et entièrement open source. C'est un choix délibéré : je considère qu'il est préférable, quand c'est possible, de ne pas dépendre de services centralisés et propriétaires. Dans un cadre professionnel avec une stack imposée, je m'adapterai sans hésiter — mais ma démarche naturelle ira toujours vers l'open source, et vers des solutions françaises ou européennes quand elles existent.
 
 **Sur l'accessibilité** — j'avais prévu une image Docker pour simplifier le déploiement et garantir la reproductibilité de l'environnement, mais je n'ai malheureusement pas eu le temps de la finaliser. C'est clairement un point à compléter.
 
 **Sur l'optimisation** — il y a probablement des aspects que j'aurais pu mieux construire, notamment dans la façon dont les modèles Ollama sont sollicités (batching, gestion du contexte, choix des paramètres). J'ai fait avec les ressources matérielles à ma disposition, et ces points d'amélioration sont identifiés dans [`ARCHITECTURE.md`](./ARCHITECTURE.md).
-

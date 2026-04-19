@@ -45,9 +45,7 @@ my-rag-system/
 │   └── Game_Programming_Patterns.txt
 ├── requirements.txt
 ├── scripts
-│   ├── ingest.py
-│   ├── retrieval.py
-│   └── test_questions.txt
+│   └── ingest.py
 ├── src
 │   ├── __init__.py
 │   ├── agents
@@ -82,17 +80,14 @@ my-rag-system/
 │       ├── __init__.py
 │       └── logger.py
 ├── structure.txt
-├── tests
-└── vector_store
-    ├── index.faiss
-    └── index.pkl
+└──── tests
+    ├── demo.py
+    └── retrieval.py
 ```
 
-### Responsabilités des modules clés
+### Responsabilités des modules clefs
 
 **`scripts/ingest.py`** — point d'entrée unique de la phase d'ingestion. Charge les fichiers du dossier `data/`, délègue le découpage à `chunker.py`, génère les embeddings via `embeddings.py`, puis sérialise l'index FAISS dans `vector_store/`. À relancer uniquement lorsque le corpus change.
-
-**`scripts/retrieval.py`** — orchestre toute la chaîne de récupération à la demande d'un agent : chunking en mémoire si nécessaire, embedding de la requête, recherche vectorielle FAISS, recherche BM25, fusion hybride RRF, reranking. Exposé comme module importable par `retriever_agent.py`.
 
 **`src/agents/state.py`** — définit le `TypedDict` central (`AgentState`) contenant : la question originale, la question réécrite, les documents récupérés, la réponse courante, le feedback du vérificateur, et l'historique de conversation. C'est le contrat partagé entre tous les nœuds du graphe.
 
@@ -210,38 +205,9 @@ sequenceDiagram
 
 Le projet fonctionne **entièrement en local** via Ollama. Il n'y a aucun coût d'API. Les seuls coûts associés sont énergétiques (électricité) et matériels (amortissement du hardware).
 
-### Coût d'ingestion (une seule fois par corpus)
-
-| Étape | Modèle | Corpus test (~3 fichiers, ~500 chunks) | Corpus moyen (~50 fichiers, ~10k chunks) |
-|---|---|---|---|
-| Génération des embeddings | nomic-embed-text | ~5–10 s | ~2–5 min |
-| Indexation FAISS | — | < 1 s | ~5–10 s |
-| **Total ingestion** | | **< 15 s** | **< 6 min** |
-
-### Coût par requête (à l'exécution)
-
-Ollama et donc les modèles utilisés sont gratuits et n'engendre aucun coût.
-
 ---
 
-## Estimations de latence
-
-```
-Requête utilisateur
-│
-├── QueryRewriter          ~1–2 s    (appel LLM léger)
-├── Embedding requête      ~0,3 s
-├── FAISS search           ~0,05 s
-├── BM25 search            ~0,05 s
-├── Fusion + Rerank        ~0,5–1 s
-├── SynthesizerAgent       ~3–8 s    (génération principale)
-└── VerifierAgent          ~2–5 s    (second appel LLM)
-
-Latence totale (1 passe)   ~7–17 s
-Latence totale (1 retry)   ~12–27 s  (si le Verifier déclenche une correction)
-```
-
-### Facteurs d'influence
+### Facteurs d'influence des latences
 
 **Taille du corpus** — l'index FAISS et le BM25 sont quasi instantanés jusqu'à ~50k chunks. Au-delà, la recherche vectorielle exacte peut devenir un goulot d'étranglement (envisager HNSW).
 
@@ -252,6 +218,8 @@ Latence totale (1 retry)   ~12–27 s  (si le Verifier déclenche une correction
 ---
 
 ## Limites actuelles
+
+**Latence** — mon PC n'a pas de GPU ce qui rend le tout très lent — en atteste les 907.68s de temps de génération pour ~591 tokens pour la démo — cela m'a donc fait perdre beaucoup de temps de test, plus que nécessaire et m'empêche de faire une estimation probable.
 
 **Corpus statique** — le vector store doit être régénéré manuellement à chaque modification du corpus (`scripts/ingest.py`). Il n'y a pas de mise à jour incrémentale.
 
